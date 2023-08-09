@@ -1,4 +1,4 @@
-package ee.desu.yologrouptestassignment;
+package ee.desu.yologrouptestassignment.dto;
 
 import java.math.BigDecimal;
 

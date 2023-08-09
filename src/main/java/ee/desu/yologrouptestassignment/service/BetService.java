@@ -1,5 +1,7 @@
-package ee.desu.yologrouptestassignment;
+package ee.desu.yologrouptestassignment.service;
 
+import ee.desu.yologrouptestassignment.dto.Bet;
+import ee.desu.yologrouptestassignment.dto.BetResult;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

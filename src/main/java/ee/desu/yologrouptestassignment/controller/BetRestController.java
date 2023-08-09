@@ -1,20 +1,23 @@
-package ee.desu.yologrouptestassignment;
+package ee.desu.yologrouptestassignment.controller;
 
+import ee.desu.yologrouptestassignment.dto.Bet;
+import ee.desu.yologrouptestassignment.dto.BetResult;
+import ee.desu.yologrouptestassignment.service.BetService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BetController {
+public class BetRestController {
 
     private final BetService betService;
 
-    public BetController(BetService betService) {
+    public BetRestController(BetService betService) {
         this.betService = betService;
     }
 
     @PostMapping("/bet")
-    BetResult placeBet(@RequestBody Bet bet) {
+    public BetResult placeBet(@RequestBody Bet bet) {
         return betService.placeBet(bet);
     }
 }
