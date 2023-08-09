@@ -1,8 +1,11 @@
 package ee.desu.yologrouptestassignment.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.desu.yologrouptestassignment.dto.Bet;
 import ee.desu.yologrouptestassignment.service.BetService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -13,6 +16,7 @@ import java.io.IOException;
 @Component
 public class BetWebSocketHandler extends TextWebSocketHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(BetWebSocketHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
     private final BetService betService;
 
@@ -21,10 +25,16 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        var bet = mapper.readValue(message.getPayload(), Bet.class);
-        var result = betService.placeBet(bet);
-        var json = mapper.writeValueAsString(result);
-        session.sendMessage(new TextMessage(json));
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+        try {
+            var bet = mapper.readValue(message.getPayload(), Bet.class);
+            var result = betService.placeBet(bet);
+            var json = mapper.writeValueAsString(result);
+            session.sendMessage(new TextMessage(json));
+        } catch (JsonProcessingException e) {
+            logger.error("Could not process JSON", e);
+        } catch (IOException e) {
+            logger.error("Could not send a WebSocket message", e);
+        }
     }
 }
