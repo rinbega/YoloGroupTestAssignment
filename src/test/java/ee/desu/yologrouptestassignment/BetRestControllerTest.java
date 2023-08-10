@@ -21,6 +21,17 @@ public class BetRestControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    public void shouldSendWonAmountWhenRequestJsonIsCorrect() throws Exception {
+        String json = "{\"guess\": 50, \"amount\": 100}";
+
+        mockMvc.perform(post("/bet")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.win").isNumber());
+    }
+
+    @Test
     public void shouldSendErrorMessageWhenRequestJsonIsEmpty() throws Exception {
         String invalidRequestJson = "{}";
 
