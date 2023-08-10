@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 public class BetRestController {
 
@@ -17,7 +19,7 @@ public class BetRestController {
     }
 
     @PostMapping("/bet")
-    public BetResult placeBet(@RequestBody Bet bet) {
+    public BetResult placeBet(@RequestBody @Valid Bet bet) {
         return betService.placeBet(bet);
     }
 }
