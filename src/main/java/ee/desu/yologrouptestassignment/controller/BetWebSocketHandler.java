@@ -36,6 +36,7 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
             var bet = mapper.readValue(message.getPayload(), Bet.class);
             var violations = validator.validate(bet);
             if (!violations.isEmpty()) {
+                logger.info("Validation failed for {}", message.getPayload());
                 var errors = violations.stream()
                         .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                         .collect(Collectors.toList());
@@ -49,9 +50,9 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
                 session.sendMessage(new TextMessage(json));
             }
         } catch (JsonProcessingException e) {
-            logger.error("Could not process JSON", e);
+            logger.info("Could not process JSON: {}", e.getMessage());
         } catch (IOException e) {
-            logger.error("Could not send a WebSocket message", e);
+            logger.error("Could not send a WebSocket message: {}", e.getMessage());
         }
     }
 }
