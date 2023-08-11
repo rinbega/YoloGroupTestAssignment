@@ -21,7 +21,7 @@ public class BetService {
     }
 
     public BetResult placeBet(Bet bet) {
-        int targetNumber = rng.nextInt(UPPER_BOUND_EXCLUSIVE - LOWER_BOUND_INCLUSIVE) + LOWER_BOUND_INCLUSIVE;
+        int targetNumber = generateTargetNumber();
         if (bet.getGuess() < targetNumber) {
             return new BetResult(calculateWin(bet));
         }
