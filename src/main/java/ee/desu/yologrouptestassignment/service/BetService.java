@@ -11,8 +11,8 @@ import java.util.random.RandomGenerator;
 @Service
 public class BetService {
 
-    private static final int LOWER_BOUND_INCLUSIVE = 1;
-    private static final int UPPER_BOUND_EXCLUSIVE = 101;
+    static final int LOWER_BOUND_INCLUSIVE = 1;
+    static final int UPPER_BOUND_EXCLUSIVE = 101;
 
     private final RandomGenerator rng;
 
