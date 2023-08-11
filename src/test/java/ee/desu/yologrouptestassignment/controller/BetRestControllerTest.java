@@ -85,4 +85,16 @@ public class BetRestControllerTest {
                 .andExpect(jsonPath("$.errors[0]")
                         .value("amount: Bet amount should be at least 0.01"));
     }
+
+    @Test
+    public void shouldSendErrorMessageWhenRequestJsonIsMalformed() throws Exception {
+        String invalidRequestJson = "{\"guess\": \"string\", \"amount\": 0.05}";
+
+        mockMvc.perform(post("/bet")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value(ApiErrorResponse.MALFORMED_JSON_MESSAGE));
+    }
 }

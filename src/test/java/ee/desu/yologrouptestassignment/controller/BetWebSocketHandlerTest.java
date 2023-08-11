@@ -88,6 +88,16 @@ public class BetWebSocketHandlerTest {
         assertThat(result.getErrors().get(0), is("amount: Bet amount should be at least 0.01"));
     }
 
+    @Test
+    public void shouldSendErrorMessageWhenRequestJsonIsMalformed() throws Exception {
+        String response = sendRequest("{\"guess\": \"string\", \"amount\": 0.05}");
+        var result = mapper.readValue(response, ApiErrorResponse.class);
+
+        assertThat(result, instanceOf(ApiErrorResponse.class));
+        assertThat(result.getStatus(), is(HttpStatus.BAD_REQUEST));
+        assertThat(result.getMessage(), is(ApiErrorResponse.MALFORMED_JSON_MESSAGE));
+    }
+
     private String sendRequest(String json) throws InterruptedException, ExecutionException, IOException, TimeoutException {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
         var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
