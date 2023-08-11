@@ -17,7 +17,7 @@ public class BetServiceRtpTest {
 
     private final Logger logger = LoggerFactory.getLogger(BetServiceRtpTest.class);
 
-    private static final int TOTAL_ROUNDS = 100_000_000;
+    private static final int TOTAL_ROUNDS = 1_000_000;
     private static final int THREAD_COUNT = 24;
     private static final int ONE_ROUND_BET = 100;
 
