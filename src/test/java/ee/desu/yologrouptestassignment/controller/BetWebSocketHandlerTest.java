@@ -44,8 +44,8 @@ public class BetWebSocketHandlerTest {
     @Test
     public void shouldSendErrorMessageWhenRequestJsonIsEmpty() throws Exception {
         String response = sendRequest("{}");
-
         var result = mapper.readValue(response, ApiErrorResponse.class);
+
         assertThat(result, instanceOf(ApiErrorResponse.class));
         assertThat(result.status(), is(HttpStatus.BAD_REQUEST));
         assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
