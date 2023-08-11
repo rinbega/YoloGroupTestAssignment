@@ -41,7 +41,7 @@ public class BetServiceRtpTest {
         ).get();
         threadPool.shutdown();
         long duration = System.currentTimeMillis() - startTime;
-        var rtp = totalWon.divide(totalSpent, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+        var rtp = totalWon.multiply(BigDecimal.valueOf(100)).divide(totalSpent, 2, RoundingMode.HALF_UP);
         logger.info("{} rounds took {} ms, RTP: {}%", TOTAL_ROUNDS, duration, rtp);
     }
 }
