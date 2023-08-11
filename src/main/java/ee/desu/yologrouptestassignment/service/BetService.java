@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
 
 @Service
@@ -14,7 +13,13 @@ public class BetService {
 
     private static final int LOWER_BOUND_INCLUSIVE = 1;
     private static final int UPPER_BOUND_EXCLUSIVE = 101;
-    private final RandomGenerator rng = new SplittableRandom();
+
+    private final RandomGenerator rng;
+
+    public BetService(RandomGenerator rng) {
+        this.rng = rng;
+    }
+
 
     public BetResult placeBet(Bet bet) {
         int targetNumber = generateTargetNumber();
