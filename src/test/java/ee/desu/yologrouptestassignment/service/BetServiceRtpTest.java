@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 public class BetServiceRtpTest {
@@ -19,7 +20,6 @@ public class BetServiceRtpTest {
     private static final int TOTAL_ROUNDS = 100_000_000;
     private static final int THREAD_COUNT = 24;
     private static final int ONE_ROUND_BET = 100;
-    private static final int GUESS = 50;
 
     @Test
     public void shouldCalculateRTPForOneMillionGames() throws ExecutionException, InterruptedException {
@@ -31,7 +31,9 @@ public class BetServiceRtpTest {
                 IntStream.range(0, TOTAL_ROUNDS)
                         .parallel()
                         .mapToObj(i -> {
-                            var bet = new Bet(GUESS, BigDecimal.valueOf(ONE_ROUND_BET));
+                            var guess = ThreadLocalRandom.current()
+                                    .nextInt(BetService.LOWER_BOUND_INCLUSIVE, BetService.UPPER_BOUND_EXCLUSIVE);
+                            var bet = new Bet(guess, BigDecimal.valueOf(ONE_ROUND_BET));
                             var result = betService.placeBet(bet);
                             return result.win();
                         })
@@ -39,7 +41,7 @@ public class BetServiceRtpTest {
         ).get();
         threadPool.shutdown();
         long duration = System.currentTimeMillis() - startTime;
-        var rtp = totalWon.divide(totalSpent, 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+        var rtp = totalWon.divide(totalSpent, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
         logger.info("{} rounds took {} ms, RTP: {}%", TOTAL_ROUNDS, duration, rtp);
     }
 }
