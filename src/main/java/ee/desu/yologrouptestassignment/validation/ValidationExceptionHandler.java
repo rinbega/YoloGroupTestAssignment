@@ -26,6 +26,6 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
                 .collect(Collectors.toList());
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
                 ApiErrorResponse.VALIDATION_FAILED_MESSAGE, errors);
-        return handleExceptionInternal(ex, apiErrorResponse, headers, apiErrorResponse.status(), request);
+        return handleExceptionInternal(ex, apiErrorResponse, headers, apiErrorResponse.getStatus(), request);
     }
 }

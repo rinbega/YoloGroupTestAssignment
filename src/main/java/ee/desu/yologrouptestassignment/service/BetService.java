@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.random.RandomGenerator;
+import java.util.Random;
 
 @Service
 public class BetService {
@@ -14,23 +14,22 @@ public class BetService {
     static final int LOWER_BOUND_INCLUSIVE = 1;
     static final int UPPER_BOUND_EXCLUSIVE = 101;
 
-    private final RandomGenerator rng;
+    private final Random rng;
 
-    public BetService(RandomGenerator rng) {
+    public BetService(Random rng) {
         this.rng = rng;
     }
 
-
     public BetResult placeBet(Bet bet) {
-        int targetNumber = generateTargetNumber();
-        if (bet.guess() < targetNumber) {
+        int targetNumber = rng.nextInt(UPPER_BOUND_EXCLUSIVE - LOWER_BOUND_INCLUSIVE) + LOWER_BOUND_INCLUSIVE;
+        if (bet.getGuess() < targetNumber) {
             return new BetResult(calculateWin(bet));
         }
         return new BetResult(BigDecimal.ZERO);
     }
 
     private int generateTargetNumber() {
-        return rng.nextInt(LOWER_BOUND_INCLUSIVE, UPPER_BOUND_EXCLUSIVE);
+        return rng.nextInt(UPPER_BOUND_EXCLUSIVE - LOWER_BOUND_INCLUSIVE) + LOWER_BOUND_INCLUSIVE;
     }
 
     /*
@@ -41,7 +40,7 @@ public class BetService {
      I swapped the win condition. (100 - bet.guess()) is fine because 100 always loses.
     */
     private BigDecimal calculateWin(Bet bet) {
-        double winFactor = (double) 99 / (100 - bet.guess());
-        return bet.amount().multiply(BigDecimal.valueOf(winFactor)).setScale(2, RoundingMode.HALF_UP);
+        double winFactor = (double) 99 / (100 - bet.getGuess());
+        return bet.getAmount().multiply(BigDecimal.valueOf(winFactor)).setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -47,9 +47,9 @@ public class BetWebSocketHandlerTest {
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
-        assertThat(result.status(), is(HttpStatus.BAD_REQUEST));
-        assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
-        assertThat(result.errors(), hasSize(2));
+        assertThat(result.getStatus(), is(HttpStatus.BAD_REQUEST));
+        assertThat(result.getMessage(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
+        assertThat(result.getErrors(), hasSize(2));
     }
 
     @Test
@@ -58,10 +58,10 @@ public class BetWebSocketHandlerTest {
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
-        assertThat(result.status(), is(HttpStatus.BAD_REQUEST));
-        assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
-        assertThat(result.errors(), hasSize(1));
-        assertThat(result.errors().get(0), is("guess: Guess should be an integer in range [1, 100]"));
+        assertThat(result.getStatus(), is(HttpStatus.BAD_REQUEST));
+        assertThat(result.getMessage(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
+        assertThat(result.getErrors(), hasSize(1));
+        assertThat(result.getErrors().get(0), is("guess: Guess should be an integer in range [1, 100]"));
     }
 
     @Test
@@ -70,10 +70,10 @@ public class BetWebSocketHandlerTest {
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
-        assertThat(result.status(), is(HttpStatus.BAD_REQUEST));
-        assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
-        assertThat(result.errors(), hasSize(1));
-        assertThat(result.errors().get(0), is("guess: Guess should be an integer in range [1, 100]"));
+        assertThat(result.getStatus(), is(HttpStatus.BAD_REQUEST));
+        assertThat(result.getMessage(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
+        assertThat(result.getErrors(), hasSize(1));
+        assertThat(result.getErrors().get(0), is("guess: Guess should be an integer in range [1, 100]"));
     }
 
     @Test
@@ -82,10 +82,10 @@ public class BetWebSocketHandlerTest {
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
-        assertThat(result.status(), is(HttpStatus.BAD_REQUEST));
-        assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
-        assertThat(result.errors(), hasSize(1));
-        assertThat(result.errors().get(0), is("amount: Bet amount should be at least 0.01"));
+        assertThat(result.getStatus(), is(HttpStatus.BAD_REQUEST));
+        assertThat(result.getMessage(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
+        assertThat(result.getErrors(), hasSize(1));
+        assertThat(result.getErrors().get(0), is("amount: Bet amount should be at least 0.01"));
     }
 
     private String sendRequest(String json) throws InterruptedException, ExecutionException, IOException, TimeoutException {

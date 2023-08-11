@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.SplittableRandom;
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
@@ -23,7 +23,7 @@ public class BetServiceRtpTest {
 
     @Test
     public void shouldCalculateRTPForOneMillionGames() throws ExecutionException, InterruptedException {
-        var betService = new BetService(new SplittableRandom());
+        var betService = new BetService(new SecureRandom());
         var threadPool = new ForkJoinPool(THREAD_COUNT);
         var totalSpent = BigDecimal.valueOf(TOTAL_ROUNDS).multiply(BigDecimal.valueOf(ONE_ROUND_BET));
         long startTime = System.currentTimeMillis();
@@ -35,7 +35,7 @@ public class BetServiceRtpTest {
                                     .nextInt(BetService.LOWER_BOUND_INCLUSIVE, BetService.UPPER_BOUND_EXCLUSIVE);
                             var bet = new Bet(guess, BigDecimal.valueOf(ONE_ROUND_BET));
                             var result = betService.placeBet(bet);
-                            return result.win();
+                            return result.getWin();
                         })
                         .reduce(BigDecimal.ZERO, BigDecimal::add)
         ).get();
