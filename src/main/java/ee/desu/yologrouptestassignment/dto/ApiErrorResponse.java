@@ -7,6 +7,7 @@ import java.util.List;
 public class ApiErrorResponse {
 
     public static final String VALIDATION_FAILED_MESSAGE = "Validation failed";
+    public static final String MALFORMED_JSON_MESSAGE = "Malformed JSON request";
 
     private final HttpStatus status;
     private final String message;
