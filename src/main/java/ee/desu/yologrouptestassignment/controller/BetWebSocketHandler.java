@@ -14,7 +14,10 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import javax.validation.ConstraintViolation;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,23 +39,45 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
             var bet = mapper.readValue(message.getPayload(), Bet.class);
             var violations = validator.validate(bet);
             if (!violations.isEmpty()) {
-                logger.info("Validation failed for {}", message.getPayload());
-                var errors = violations.stream()
-                        .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                        .collect(Collectors.toList());
-                var errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
-                        ApiErrorResponse.VALIDATION_FAILED_MESSAGE, errors);
-                var jsonErrorResponse = mapper.writeValueAsString(errorResponse);
-                session.sendMessage(new TextMessage(jsonErrorResponse));
+                handleValidationErrors(session, message, violations);
             } else {
                 var result = betService.placeBet(bet);
                 var json = mapper.writeValueAsString(result);
                 session.sendMessage(new TextMessage(json));
             }
         } catch (JsonProcessingException e) {
-            logger.info("Could not process JSON: {}", e.getMessage());
+            handleJsonProcessingException(session, e);
         } catch (IOException e) {
-            logger.error("Could not send a WebSocket message: {}", e.getMessage());
+            logger.error("I/O error occurred while sending a WebSocket message: {}", e.getMessage());
+        }
+    }
+
+    private void handleJsonProcessingException(WebSocketSession session, JsonProcessingException ex) {
+        logger.info("Could not process JSON: {}", ex.getMessage());
+        var errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
+                ApiErrorResponse.MALFORMED_JSON_MESSAGE, List.of());
+        try {
+            var jsonErrorResponse = mapper.writeValueAsString(errorResponse);
+            session.sendMessage(new TextMessage(jsonErrorResponse));
+        } catch (IOException e) {
+            logger.error("I/O error occurred while sending a WebSocket message: {}", e.getMessage());
+        }
+    }
+
+    private static void handleValidationErrors(WebSocketSession session,
+                                               TextMessage message,
+                                               Set<ConstraintViolation<Bet>> violations) {
+        logger.info("Validation failed for {}", message.getPayload());
+        var errors = violations.stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.toList());
+        var errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
+                ApiErrorResponse.VALIDATION_FAILED_MESSAGE, errors);
+        try {
+            var jsonErrorResponse = mapper.writeValueAsString(errorResponse);
+            session.sendMessage(new TextMessage(jsonErrorResponse));
+        } catch (IOException e) {
+            logger.error("I/O error occurred while sending a WebSocket message: {}", e.getMessage());
         }
     }
 }
