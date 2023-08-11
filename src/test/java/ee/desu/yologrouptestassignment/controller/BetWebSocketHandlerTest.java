@@ -13,8 +13,11 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -32,13 +35,7 @@ public class BetWebSocketHandlerTest {
 
     @Test
     public void shouldSendWonAmountWhenRequestJsonIsCorrect() throws Exception {
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
-        var session = future.get();
-        String correctRequestJson = "{\"guess\": 50, \"amount\": 100}";
-        session.sendMessage(new TextMessage(correctRequestJson));
-        String response = completableFuture.get(10, TimeUnit.SECONDS);
-        session.close();
+        String response = sendRequest("{\"guess\": 50, \"amount\": 100}");
         var result = mapper.readValue(response, BetResult.class);
 
         assertThat(result, instanceOf(BetResult.class));
@@ -46,13 +43,7 @@ public class BetWebSocketHandlerTest {
 
     @Test
     public void shouldSendErrorMessageWhenRequestJsonIsEmpty() throws Exception {
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
-        var session = future.get();
-        String invalidRequestJson = "{}";
-        session.sendMessage(new TextMessage(invalidRequestJson));
-        String response = completableFuture.get(10, TimeUnit.SECONDS);
-        session.close();
+        String response = sendRequest("{}");
 
         var result = mapper.readValue(response, ApiErrorResponse.class);
         assertThat(result, instanceOf(ApiErrorResponse.class));
@@ -63,13 +54,7 @@ public class BetWebSocketHandlerTest {
 
     @Test
     public void shouldSendErrorMessageWhenRequestJsonGuessIsLessThan1() throws Exception {
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
-        var session = future.get();
-        String invalidRequestJson = "{\"guess\": 0, \"amount\": 100}";
-        session.sendMessage(new TextMessage(invalidRequestJson));
-        String response = completableFuture.get(10, TimeUnit.SECONDS);
-        session.close();
+        String response = sendRequest("{\"guess\": 0, \"amount\": 100}");
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
@@ -81,13 +66,7 @@ public class BetWebSocketHandlerTest {
 
     @Test
     public void shouldSendErrorMessageWhenRequestJsonGuessIsGreaterThan100() throws Exception {
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
-        var session = future.get();
-        String invalidRequestJson = "{\"guess\": 101, \"amount\": 100}";
-        session.sendMessage(new TextMessage(invalidRequestJson));
-        String response = completableFuture.get(10, TimeUnit.SECONDS);
-        session.close();
+        String response = sendRequest("{\"guess\": 101, \"amount\": 100}");
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
@@ -99,13 +78,7 @@ public class BetWebSocketHandlerTest {
 
     @Test
     public void shouldSendErrorMessageWhenRequestJsonBetAmountIsLessThan1Cent() throws Exception {
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
-        var session = future.get();
-        String invalidRequestJson = "{\"guess\": 50, \"amount\": 0.00}";
-        session.sendMessage(new TextMessage(invalidRequestJson));
-        String response = completableFuture.get(10, TimeUnit.SECONDS);
-        session.close();
+        String response = sendRequest("{\"guess\": 50, \"amount\": 0.00}");
         var result = mapper.readValue(response, ApiErrorResponse.class);
 
         assertThat(result, instanceOf(ApiErrorResponse.class));
@@ -113,6 +86,16 @@ public class BetWebSocketHandlerTest {
         assertThat(result.message(), is(ApiErrorResponse.VALIDATION_FAILED_MESSAGE));
         assertThat(result.errors(), hasSize(1));
         assertThat(result.errors().get(0), is("amount: Bet amount should be at least 0.01"));
+    }
+
+    private String sendRequest(String json) throws InterruptedException, ExecutionException, IOException, TimeoutException {
+        CompletableFuture<String> completableFuture = new CompletableFuture<>();
+        var future = client.doHandshake(new TestWebSocketHandler(completableFuture), "ws://localhost:" + port + "/ws/bet");
+        var session = future.get();
+        session.sendMessage(new TextMessage(json));
+        String response = completableFuture.get(10, TimeUnit.SECONDS);
+        session.close();
+        return response;
     }
 
     private static class TestWebSocketHandler extends TextWebSocketHandler {
