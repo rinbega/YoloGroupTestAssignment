@@ -9,11 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import javax.validation.Validator;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -22,10 +22,10 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(BetWebSocketHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-    private final Validator validator;
+    private final LocalValidatorFactoryBean validator;
     private final BetService betService;
 
-    public BetWebSocketHandler(Validator validator, BetService betService) {
+    public BetWebSocketHandler(LocalValidatorFactoryBean validator, BetService betService) {
         this.validator = validator;
         this.betService = betService;
     }

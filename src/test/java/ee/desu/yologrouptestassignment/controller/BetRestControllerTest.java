@@ -1,4 +1,4 @@
-package ee.desu.yologrouptestassignment;
+package ee.desu.yologrouptestassignment.controller;
 
 import ee.desu.yologrouptestassignment.dto.ApiErrorResponse;
 import org.junit.jupiter.api.Test;
@@ -22,11 +22,11 @@ public class BetRestControllerTest {
 
     @Test
     public void shouldSendWonAmountWhenRequestJsonIsCorrect() throws Exception {
-        String json = "{\"guess\": 50, \"amount\": 100}";
+        String correctRequestJson = "{\"guess\": 50, \"amount\": 100}";
 
         mockMvc.perform(post("/bet")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(correctRequestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.win").isNumber());
     }
@@ -60,7 +60,7 @@ public class BetRestControllerTest {
 
     @Test
     public void shouldSendErrorMessageWhenRequestJsonGuessIsGreaterThan100() throws Exception {
-        String invalidRequestJson = "{\"guess\": -3, \"amount\": 101}";
+        String invalidRequestJson = "{\"guess\": 101, \"amount\": 100}";
 
         mockMvc.perform(post("/bet")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,7 +73,7 @@ public class BetRestControllerTest {
     }
 
     @Test
-    public void shouldSendErrorMessageWhenRequestJsonGuessIsLessThan1Cent() throws Exception {
+    public void shouldSendErrorMessageWhenRequestJsonBetAmountIsLessThan1Cent() throws Exception {
         String invalidRequestJson = "{\"guess\": 50, \"amount\": 0.00}";
 
         mockMvc.perform(post("/bet")
