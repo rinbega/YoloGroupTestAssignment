@@ -23,7 +23,7 @@ public class BetService {
 
     public BetResult placeBet(Bet bet) {
         int targetNumber = generateTargetNumber();
-        if (bet.guess() > targetNumber) {
+        if (bet.guess() < targetNumber) {
             return new BetResult(calculateWin(bet));
         }
         return new BetResult(BigDecimal.ZERO);
@@ -37,14 +37,11 @@ public class BetService {
      Provided formula win = bet * (99 / (100 - guess)) together win the win condition guess > targetNumber means that
      picking 99 results in winning 99 times your bet with a probability of 98% (and 100 must be a special case), while
      picking 2 results in winning 1.01 times your bet with a probability of 1% (number 1 is never going to win).
+
+     I swapped the win condition. (100 - bet.guess()) is fine because 100 always loses.
     */
     private BigDecimal calculateWin(Bet bet) {
-        double winFactor;
-        if (bet.guess() == 100) {
-            winFactor = 99;
-        } else {
-            winFactor = (double) 99 / (100 - bet.guess());
-        }
+        double winFactor = (double) 99 / (100 - bet.guess());
         return bet.amount().multiply(BigDecimal.valueOf(winFactor)).setScale(2, RoundingMode.HALF_UP);
     }
 }

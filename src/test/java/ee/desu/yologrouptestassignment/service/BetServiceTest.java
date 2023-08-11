@@ -36,27 +36,27 @@ public class BetServiceTest {
     }
 
     @Test
-    public void shouldLoseWhenGuessIsLower() {
-        when(rng.nextInt(anyInt(), anyInt())).thenReturn(51);
-        Bet bet = new Bet(50, BigDecimal.valueOf(100));
+    public void shouldLoseWhenGuessIsHigher() {
+        when(rng.nextInt(anyInt(), anyInt())).thenReturn(50);
+        Bet bet = new Bet(51, BigDecimal.valueOf(100));
         BetResult result = betService.placeBet(bet);
 
         assertThat(result.win(), is(BigDecimal.ZERO));
     }
 
     @Test
-    public void shouldWinWhenGuessIsHigher() {
-        when(rng.nextInt(anyInt(), anyInt())).thenReturn(1);
-        Bet bet = new Bet(70, BigDecimal.valueOf(100));
+    public void shouldWinWhenGuessIsLower() {
+        when(rng.nextInt(anyInt(), anyInt())).thenReturn(100);
+        Bet bet = new Bet(40, BigDecimal.valueOf(100));
         BetResult result = betService.placeBet(bet);
 
-        assertThat(result.win(), comparesEqualTo(BigDecimal.valueOf(330)));
+        assertThat(result.win(), comparesEqualTo(BigDecimal.valueOf(165)));
     }
 
     @Test
-    public void shouldWinMaximumWhenGuessIs100() {
-        when(rng.nextInt(anyInt(), anyInt())).thenReturn(1);
-        Bet bet = new Bet(100, BigDecimal.valueOf(100));
+    public void shouldWinMaximumWhenGuessIs99() {
+        when(rng.nextInt(anyInt(), anyInt())).thenReturn(100);
+        Bet bet = new Bet(99, BigDecimal.valueOf(100));
         BetResult result = betService.placeBet(bet);
 
         assertThat(result.win(), comparesEqualTo(BigDecimal.valueOf(9900)));
@@ -64,7 +64,7 @@ public class BetServiceTest {
 
     @Test
     public void shouldGetCorrectWinAccordingToExample() {
-        when(rng.nextInt(anyInt(), anyInt())).thenReturn(30);
+        when(rng.nextInt(anyInt(), anyInt())).thenReturn(100);
         Bet bet = new Bet(50, BigDecimal.valueOf(40.5));
         BetResult result = betService.placeBet(bet);
 
