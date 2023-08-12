@@ -70,6 +70,24 @@ public class BetServiceTest {
         assertThat(result.getWin(), comparesEqualTo(BigDecimal.valueOf(80.19)));
     }
 
+    @Test
+    public void shouldGetCorrectWinForMinimumBetAmount() {
+        fakeNextRng(100);
+        Bet bet = new Bet(50, BigDecimal.valueOf(0.01));
+        BetResult result = betService.placeBet(bet);
+
+        assertThat(result.getWin(), comparesEqualTo(BigDecimal.valueOf(0.02)));
+    }
+
+    @Test
+    public void shouldGetSameAmountBackForLowestGuess() {
+        fakeNextRng(100);
+        Bet bet = new Bet(1, BigDecimal.valueOf(100));
+        BetResult result = betService.placeBet(bet);
+
+        assertThat(result.getWin(), comparesEqualTo(BigDecimal.valueOf(100)));
+    }
+
     private void fakeNextRng(int target) {
         when(rng.nextInt(BetService.UPPER_BOUND_EXCLUSIVE - BetService.LOWER_BOUND_INCLUSIVE))
                 .thenReturn(target - BetService.LOWER_BOUND_INCLUSIVE);
