@@ -1,5 +1,6 @@
 package ee.desu.yologrouptestassignment.validation;
 
+import ee.desu.yologrouptestassignment.controller.BetRestController;
 import ee.desu.yologrouptestassignment.dto.ApiErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = {BetRestController.class})
 public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidationExceptionHandler.class);
