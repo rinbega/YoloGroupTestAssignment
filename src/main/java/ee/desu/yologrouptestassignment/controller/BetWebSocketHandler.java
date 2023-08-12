@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.desu.yologrouptestassignment.dto.ApiErrorResponse;
 import ee.desu.yologrouptestassignment.dto.Bet;
+import ee.desu.yologrouptestassignment.dto.BetResult;
 import ee.desu.yologrouptestassignment.service.BetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +42,35 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
             if (!violations.isEmpty()) {
                 handleValidationErrors(session, message, violations);
             } else {
-                var result = betService.placeBet(bet);
-                var json = mapper.writeValueAsString(result);
-                session.sendMessage(new TextMessage(json));
+                handleSuccessfulRequest(session, bet);
             }
         } catch (JsonProcessingException e) {
             handleJsonProcessingException(session, e);
-        } catch (IOException e) {
-            logger.error("I/O error occurred while sending a WebSocket message: {}", e.getMessage());
         }
+    }
+
+    private void handleSuccessfulRequest(WebSocketSession session, Bet bet) {
+        var result = betService.placeBet(bet);
+        sendBetResult(session, result);
     }
 
     private void handleJsonProcessingException(WebSocketSession session, JsonProcessingException ex) {
         logger.info("Could not process JSON: {}", ex.getMessage());
-        var errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
-                ApiErrorResponse.MALFORMED_JSON_MESSAGE, List.of());
+        sendErrorResponse(session, HttpStatus.BAD_REQUEST, ApiErrorResponse.MALFORMED_JSON_MESSAGE, List.of());
+    }
+
+    private void handleValidationErrors(WebSocketSession session,
+                                        TextMessage message,
+                                        Set<ConstraintViolation<Bet>> violations) {
+        logger.info("Validation failed for {}", message.getPayload());
+        var errors = violations.stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.toList());
+        sendErrorResponse(session, HttpStatus.BAD_REQUEST, ApiErrorResponse.VALIDATION_FAILED_MESSAGE, errors);
+    }
+
+    private void sendErrorResponse(WebSocketSession session, HttpStatus status, String message, List<String> errors) {
+        var errorResponse = new ApiErrorResponse(status, message, errors);
         try {
             var jsonErrorResponse = mapper.writeValueAsString(errorResponse);
             session.sendMessage(new TextMessage(jsonErrorResponse));
@@ -64,18 +79,10 @@ public class BetWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private static void handleValidationErrors(WebSocketSession session,
-                                               TextMessage message,
-                                               Set<ConstraintViolation<Bet>> violations) {
-        logger.info("Validation failed for {}", message.getPayload());
-        var errors = violations.stream()
-                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
-        var errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST,
-                ApiErrorResponse.VALIDATION_FAILED_MESSAGE, errors);
+    private void sendBetResult(WebSocketSession session, BetResult result) {
         try {
-            var jsonErrorResponse = mapper.writeValueAsString(errorResponse);
-            session.sendMessage(new TextMessage(jsonErrorResponse));
+            var json = mapper.writeValueAsString(result);
+            session.sendMessage(new TextMessage(json));
         } catch (IOException e) {
             logger.error("I/O error occurred while sending a WebSocket message: {}", e.getMessage());
         }
